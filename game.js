@@ -17,9 +17,15 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 let viewSX = 1, viewSY = 1;
 
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+const TOUCH_GUTTER = 64 + 20; // button width + padding; see #touch in style.css
+
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const scale = Math.min(window.innerWidth / W, window.innerHeight / H);
+  // on touch screens in landscape, keep the side gutters free for the buttons
+  const landscapeTouch = isTouch && window.innerWidth > window.innerHeight;
+  const availW = window.innerWidth - (landscapeTouch ? 2 * TOUCH_GUTTER : 0);
+  const scale = Math.min(availW / W, window.innerHeight / H);
   const cssW = Math.floor(W * scale), cssH = Math.floor(H * scale);
   canvas.style.width = cssW + 'px';
   canvas.style.height = cssH + 'px';
@@ -371,7 +377,6 @@ document.querySelectorAll('#touch button').forEach(btn => {
   }
 });
 canvas.addEventListener('pointerdown', () => { sfx.init(); pressed.add('start'); });
-const isTouch = window.matchMedia('(pointer: coarse)').matches;
 
 // ---------- state ----------
 const game = {

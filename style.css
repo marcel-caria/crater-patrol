@@ -42,14 +42,30 @@ canvas {
   line-height: normal;
 }
 
-@media (pointer: coarse) {
-  #touch { display: flex; }
-}
-
 .pad {
   display: flex;
   gap: 14px;
   pointer-events: auto;
+}
+
+/* Touch devices: controls live outside the game picture, pinned to the screen edges.
+   Landscape: stacked in the side gutters (game.js keeps the gutters wide enough).
+   Portrait: in a row below the game. */
+@media (pointer: coarse) {
+  #touch {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    align-items: flex-end;
+    padding: 16px 10px;
+  }
+  .pad { flex-direction: column; }
+  .pad:first-child { flex-direction: column-reverse; } /* faster on top, slower below */
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  #touch { padding: 24px 16px; }
+  .pad, .pad:first-child { flex-direction: row; }
 }
 
 #touch button {
