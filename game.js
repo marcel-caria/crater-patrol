@@ -363,11 +363,26 @@ window.addEventListener('blur', () => {
   keys.clear();
   if (game.state === 'playing') game.paused = true;
 });
+// Phones: a tap goes fullscreen (hides the address bar) and locks to landscape where supported.
+// iPhone Safari has no fullscreen for pages, so there this quietly does nothing.
+function goFullscreen() {
+  if (!isTouch || document.fullscreenElement || document.webkitFullscreenElement) return;
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!req) return;
+  Promise.resolve(req.call(el, { navigationUI: 'hide' }))
+    .then(() => screen.orientation?.lock?.('landscape'))
+    .catch(() => {});
+}
+document.addEventListener('fullscreenchange', resize);
+document.addEventListener('webkitfullscreenchange', resize);
+
 document.querySelectorAll('#touch button').forEach(btn => {
   const a = btn.dataset.action;
   btn.addEventListener('pointerdown', e => {
     e.preventDefault();
     btn.setPointerCapture?.(e.pointerId);
+    goFullscreen();
     sfx.init();
     keys.add(a); pressed.add(a);
     btn.classList.add('on');
@@ -376,7 +391,7 @@ document.querySelectorAll('#touch button').forEach(btn => {
     btn.addEventListener(ev, () => { keys.delete(a); btn.classList.remove('on'); });
   }
 });
-canvas.addEventListener('pointerdown', () => { sfx.init(); pressed.add('start'); });
+canvas.addEventListener('pointerdown', () => { goFullscreen(); sfx.init(); pressed.add('start'); });
 
 // ---------- state ----------
 const game = {
